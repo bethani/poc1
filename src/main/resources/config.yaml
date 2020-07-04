@@ -1,0 +1,9 @@
+DB details:
+db.url: "jdbc:postgresql://indianacs-cluster-nonprodvpc-aurora.cluster-cy2bmltj0oql.us-gov-east-1.rds.amazonaws.com:5425/IndianaCSAuroraDB?sslmode=require"
+db.user: "IndianaCSAurora"
+db.pwd: 
+
+http: 
+ host: "0.0.0.0"
+ port: "8084"
+ path: "/auroa"

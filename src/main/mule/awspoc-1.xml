@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="027782cc-919b-46dd-8b97-8ab0c871d2f2" >
+		<http:listener-connection host="${http,host" port="${http.port}" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="61054c37-edc1-43af-abc8-4e7e1d13ef7e" >
+		<db:generic-connection url="${db.url}" user="${db.user}" />
+	</db:config>
+	<flow name="awspoc-1Flow" doc:id="a074c5b6-c38b-49f3-bc0d-429a8445686e" >
+		<http:listener doc:name="Listener" doc:id="b2d054b0-2a18-48ea-a61b-c30c162278c8" config-ref="HTTP_Listener_config" path="/auroa"/>
+		<logger level="INFO" doc:name="Logger" doc:id="746ce694-6255-4da8-98ba-9ecfa14bd76b" />
+		<db:select doc:name="Select" doc:id="fa6b855b-80dd-4e0a-89da-a15e063f0b37" config-ref="Database_Config">
+			<db:sql >select * from </db:sql>
+		</db:select>
+		<ee:transform doc:name="Response Message" doc:id="fd3fad19-d5c2-425d-b73b-44b808de5bd7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json 
+---
+payload ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4bb44942-a36a-43eb-a685-e7d18f467f7e" message="Response is #[payload]"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="fd49b874-a2aa-4bab-afed-965a8b8c7fa5" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="5697ff1d-9f90-46d7-8967-6bb91c1e9464" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json 
+---
+{
+	errorMessage: "Error occourd while processing the request"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>
